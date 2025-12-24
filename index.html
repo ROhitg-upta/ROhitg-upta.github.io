@@ -1,22 +1,577 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Responsive Navigation</title>
-<link rel="stylesheet" href="style.css">
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>YouTube – Mock Homepage (HTML & CSS Only)</title>
+  <style> 
+    :root{
+      --bg:#0f0f0f;
+      --bg-elev:#171717;
+      --panel:#1c1c1c;
+      --text:#ffffff;
+      --text-dim:#b0b0b0;
+      --border:#2a2a2a;
+      --hover:#242424;
+      --accent:#ff0033;
+      --chip:#262626;
+      --chip-border:#3a3a3a;
+      --focus:#3ea6ff;
+    }
 
+    *{box-sizing:border-box}
+    html,body{height:100%;margin:0;background:var(--bg);color:var(--text);font-family:Inter,system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial,"Noto Sans",sans-serif}
+    a{color:inherit;text-decoration:none}
+    a:focus-visible{outline:2px solid var(--focus);outline-offset:2px;border-radius:6px}
+
+    /* App layout */
+    .app{
+      display:grid;
+      grid-template-columns:240px 1fr;
+      grid-template-rows:auto auto 1fr;
+      grid-template-areas:
+        "header header"
+        "chips chips"
+        "sidebar main";
+      min-height:100vh;
+    }
+
+    /* Header */
+    header{
+      grid-area:header;
+      display:grid;
+      grid-template-columns:220px 1fr 240px;
+      align-items:center;
+      gap:1rem;
+      padding:0.5rem 1rem;
+      position:sticky;top:0;z-index:100;
+      background:var(--bg);
+      border-bottom:1px solid var(--border);
+    }
+    .left{display:flex;align-items:center;gap:0.5rem}
+    .hamburger{
+      display:grid;place-items:center;
+      width:36px;height:36px;border-radius:50%;
+      border:none;background:transparent;color:var(--text);cursor:pointer
+    }
+    .hamburger:hover{background:var(--hover)}
+    .logo{
+      display:flex;align-items:center;gap:0.5rem;font-weight:700;letter-spacing:.2px
+    }
+    /* Custom inline "YouTube" style logo */
+    .logo-mark{
+      display:inline-block;position:relative;width:28px;height:20px;border-radius:6px;background:var(--accent);
+      box-shadow:0 0 0 1px rgba(255,255,255,.06),0 6px 14px rgba(255,0,51,.25)
+    }
+    .logo-mark::after{
+      content:"";position:absolute;left:9px;top:6px;
+      border-left:10px solid #fff;border-top:6px solid transparent;border-bottom:6px solid transparent;width:0;height:0
+    }
+    .logo-text{font-size:1.05rem}
+
+    /* Search */
+    .search{
+      display:grid;grid-template-columns:1fr auto auto;gap:.5rem;align-items:center
+    }
+    .search-bar{
+      display:flex;align-items:center;gap:.5rem;background:var(--panel);
+      border:1px solid var(--border);border-radius:999px;padding:.35rem .6rem
+    }
+    .search-bar svg{opacity:.7}
+    .search-input{
+      flex:1;background:transparent;border:none;color:var(--text);font-size:.95rem;outline:none;padding:.35rem .2rem
+    }
+    .search-btn,.mic-btn{
+      height:40px;min-width:56px;display:grid;place-items:center;
+      border-radius:999px;border:1px solid var(--border);background:#202020;color:var(--text);cursor:pointer
+    }
+    .search-btn:hover,.mic-btn:hover{background:var(--hover)}
+
+    /* Actions */
+    .actions{display:flex;justify-content:flex-end;align-items:center;gap:.5rem}
+    .action-btn{
+      width:36px;height:36px;display:grid;place-items:center;border-radius:50%;background:transparent;border:none;color:var(--text);cursor:pointer
+    }
+    .action-btn:hover{background:var(--hover)}
+    .avatar{
+      width:32px;height:32px;border-radius:50%;
+      background:linear-gradient(135deg,#8a2be2,#ff6b6b);border:1px solid var(--border)
+    }
+
+    /* Chips */
+    .chips{
+      grid-area:chips;display:flex;gap:.5rem;padding:.75rem 1rem;position:sticky;top:56px;z-index:90;
+      background:var(--bg);border-bottom:1px solid var(--border);overflow:auto
+    }
+    .chip{
+      padding:.45rem .8rem;border-radius:999px;background:var(--chip);
+      border:1px solid var(--chip-border);color:var(--text);font-size:.9rem;white-space:nowrap;cursor:pointer
+    }
+    .chip:hover{background:var(--hover)}
+    .chip.active{background:#fff;color:#000;border-color:transparent}
+
+    /* Sidebar */
+    aside{
+      grid-area:sidebar;padding:.75rem .5rem;border-right:1px solid var(--border);
+      position:sticky;top:104px;align-self:start;height:calc(100vh - 104px);overflow:auto;background:var(--bg)
+    }
+    .nav-group{padding:.25rem .25rem .75rem;border-bottom:1px solid var(--border)}
+    .nav-item{
+      display:flex;align-items:center;gap:.75rem;padding:.55rem .75rem;border-radius:10px;color:var(--text)
+    }
+    .nav-item:hover{background:var(--hover)}
+    .nav-icon{
+      width:22px;height:22px;border-radius:6px;background:#2f2f2f;display:inline-block
+    }
+    .nav-label{font-size:.95rem}
+
+    /* Main */
+    main{grid-area:main;padding:1rem}
+    .grid{display:grid;grid-template-columns:repeat(4,1fr);gap:1rem}
+
+    @media (max-width:1200px){.grid{grid-template-columns:repeat(3,1fr)}}
+    @media (max-width:900px){
+      .grid{grid-template-columns:repeat(2,1fr)}
+      header{grid-template-columns:180px 1fr 200px}
+    }
+    @media (max-width:640px){
+      .grid{grid-template-columns:1fr}
+      .app{grid-template-columns:0 1fr}
+      aside{display:none}
+    }
+
+    /* Cards */
+    .card{border-radius:12px;overflow:hidden}
+    .thumb{
+      position:relative;display:block;border-radius:12px;overflow:hidden;background:#222;aspect-ratio:16/9
+    }
+    .thumb img{width:100%;height:100%;object-fit:cover;display:block;filter:saturate(.95) contrast(1.05)}
+    .thumb::after{
+      content:"";position:absolute;inset:0;box-shadow:inset 0 0 0 1px rgba(255,255,255,.04)
+    }
+    .thumb:hover img{transform:scale(1.02);transition:transform 160ms ease}
+    .duration{
+      position:absolute;right:8px;bottom:8px;font-size:.8rem;background:rgba(0,0,0,.75);
+      color:#fff;padding:2px 6px;border-radius:4px
+    }
+    .meta{
+      display:grid;grid-template-columns:40px 1fr auto;gap:.75rem;padding:.6rem .25rem
+    }
+    .channel-link{display:block}
+    .channel-avatar{
+      width:40px;height:40px;border-radius:50%;background:#2b2b2b;border:1px solid var(--border)
+    }
+    .text{display:grid;gap:.22rem}
+    .title{
+      font-size:.98rem;line-height:1.35;font-weight:600;color:var(--text)
+    }
+    .title:hover{color:#eaeaea}
+    .byline{font-size:.86rem;color:var(--text-dim)}
+    .byline:hover{color:#cfcfcf}
+    .stats{font-size:.85rem;color:var(--text-dim)}
+    .menu{
+      width:28px;height:28px;border-radius:50%;display:grid;place-items:center;color:var(--text-dim)
+    }
+
+    /* Subtle card hover halo */
+    .card:hover .thumb{box-shadow:0 6px 18px rgba(0,0,0,.35)}
+    .spacer{height:2.5rem}
+  </style>
 </head>
 <body>
-<nav class="nav">
-<div class="logo">MySite</div>
-<div class="hamburger">☰<i class="fa-solid fa-bar"></i> </div>
-<div class="menu">
-<a href="#">Home</a>
-<a href="#">About</a>
-<a href="#">Services</a>
-<a href="#">Contact</a>
-</div>
-</nav>
+  <div class="app">
+    <!-- Header -->
+    <header>
+      <div class="left">
+        <button class="hamburger" aria-label="Menu">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+            <rect x="3" y="6" width="18" height="2"></rect>
+            <rect x="3" y="11" width="18" height="2"></rect>
+            <rect x="3" y="16" width="18" height="2"></rect>
+          </svg>
+        </button>
+        <a class="logo" href="/" aria-label="Home">
+          <span class="logo-mark" aria-hidden="true"></span>
+          <span class="logo-text">YouTube</span>
+        </a>
+      </div>
+
+      <div class="search">
+        <div class="search-bar" role="search">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="#bdbdbd" aria-hidden="true">
+            <path d="M10 4a6 6 0 014.472 10.013l4.257 4.257-1.414 1.414-4.257-4.257A6 6 0 1110 4zm0 2a4 4 0 100 8 4 4 0 000-8z"/>
+          </svg>
+          <input class="search-input" type="text" placeholder="Search" aria-label="Search" />
+        </div>
+        <button class="search-btn" aria-label="Search">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+            <path d="M10 4a6 6 0 014.472 10.013l4.257 4.257-1.414 1.414-4.257-4.257A6 6 0 1110 4zm0 2a4 4 0 100 8 4 4 0 000-8z"/>
+          </svg>
+        </button>
+        <button class="mic-btn" aria-label="Voice search">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+            <path d="M12 14a3 3 0 003-3V6a3 3 0 10-6 0v5a3 3 0 003 3zm-6-3a6 6 0 0012 0h2a8 8 0 01-7 7.938V22h-2v-3.062A8 8 0 014 11h2z"/>
+          </svg>
+        </button>
+      </div>
+
+      <div class="actions">
+        <a class="action-btn" href="#create" aria-label="Create">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor"><path d="M11 11V5h2v6h6v2h-6v6h-2v-6H5v-2z"/></svg>
+        </a>
+        <a class="action-btn" href="#notifications" aria-label="Notifications">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
+            <path d="M12 22a2 2 0 002-2H10a2 2 0 002 2zm6-6V11a6 6 0 10-12 0v5l-2 2v1h16v-1l-2-2z"/>
+          </svg>
+        </a>
+        <a href="profile.html" aria-label="Profile">
+          <div class="avatar" aria-hidden="true"></div>
+        </a>
+      </div>
+    </header>
+
+    <!-- Chips -->
+    <div class="chips" role="list">
+      <a class="chip active" role="listitem" href="#all">All</a>
+      <a class="chip" role="listitem" href="#music">Music</a>
+      <a class="chip" role="listitem" href="#gaming">Gaming</a>
+      <a class="chip" role="listitem" href="#news">News</a>
+      <a class="chip" role="listitem" href="#live">Live</a>
+      <a class="chip" role="listitem" href="#ai">AI</a>
+      <a class="chip" role="listitem" href="#podcasts">Podcasts</a>
+      <a class="chip" role="listitem" href="#cricket">Cricket</a>
+      <a class="chip" role="listitem" href="#comedy">Comedy</a>
+      <a class="chip" role="listitem" href="#documentary">Documentary</a>
+    </div>
+
+    <!-- Sidebar -->
+    <aside aria-label="Primary">
+      <div class="nav-group">
+        <a class="nav-item" href="#home"><span class="nav-icon"></span><span class="nav-label">Home</span></a>
+        <a class="nav-item" href="#trending"><span class="nav-icon"></span><span class="nav-label">Trending</span></a>
+        <a class="nav-item" href="#subscriptions"><span class="nav-icon"></span><span class="nav-label">Subscriptions</span></a>
+      </div>
+      <div class="nav-group">
+        <a class="nav-item" href="#library"><span class="nav-icon"></span><span class="nav-label">Library</span></a>
+        <a class="nav-item" href="#history"><span class="nav-icon"></span><span class="nav-label">History</span></a>
+        <a class="nav-item" href="#watch-later"><span class="nav-icon"></span><span class="nav-label">Watch later</span></a>
+        <a class="nav-item" href="#liked"><span class="nav-icon"></span><span class="nav-label">Liked videos</span></a>
+      </div>
+    </aside>
+
+    <!-- Main -->
+    <main>
+      <div class="grid">
+        <!-- 16+ cards to ensure 2 page scroll; duplicate/edit as needed -->
+
+        <!-- Card 1 -->
+        <article class="card">
+          <a class="thumb" href="video1.html" aria-label="Open video: Mastering CSS Grid">
+            <img src="https://picsum.photos/seed/yt1/800/450" alt="Video thumbnail" />
+            <span class="duration">12:34</span>
+          </a>
+          <div class="meta">
+            <a class="channel-link" href="channel1.html" aria-label="Frontline Dev channel">
+              <img class="channel-avatar" src="https://picsum.photos/seed/ch1/80" alt="Channel avatar" />
+            </a>
+            <div class="text">
+              <a class="title" href="video1.html">Mastering CSS Grid: Real-world layouts</a>
+              <a class="byline" href="channel1.html">Frontline Dev</a>
+              <div class="stats">423K views • 2 weeks ago</div>
+            </div>
+            <div class="menu" aria-hidden="true">⋮</div>
+          </div>
+        </article>
+        <!-- adding an comment -->
+
+        <!-- Card 2 -->
+        <article class="card">
+          <a class="thumb" href="video2.html" aria-label="Open video: Lo-fi beats">
+            <img src="https://picsum.photos/seed/yt2/800/450" alt="Video thumbnail" />
+            <span class="duration">8:21</span>
+          </a>
+          <div class="meta">
+            <a class="channel-link" href="channel2.html" aria-label="Studio Flow channel">
+              <img class="channel-avatar" src="https://picsum.photos/seed/ch2/80" alt="Channel avatar" />
+            </a>
+            <div class="text">
+              <a class="title" href="video2.html">Lo-fi beats to code and relax to</a>
+              <a class="byline" href="channel2.html">Studio Flow</a>
+              <div class="stats">1.2M views • 1 month ago</div>
+            </div>
+            <div class="menu">⋮</div>
+          </div>
+        </article>
+
+        <!-- Card 3 -->
+        <article class="card">
+          <a class="thumb" href="video3.html" aria-label="Open video: India vs Australia">
+            <img src="https://picsum.photos/seed/yt3/800/450" alt="Video thumbnail" />
+            <span class="duration">24:02</span>
+          </a>
+          <div class="meta">
+            <a class="channel-link" href="channel3.html">
+              <img class="channel-avatar" src="https://picsum.photos/seed/ch3/80" alt="Channel avatar" />
+            </a>
+            <div class="text">
+              <a class="title" href="video3.html">India vs Australia: Highlights & analysis</a>
+              <a class="byline" href="channel3.html">Cricket Central</a>
+              <div class="stats">987K views • 3 days ago</div>
+            </div>
+            <div class="menu">⋮</div>
+          </div>
+        </article>
+
+        <!-- Card 4 -->
+        <article class="card">
+          <a class="thumb" href="video4.html" aria-label="Open video: AI in 2026">
+            <img src="https://picsum.photos/seed/yt4/800/450" alt="Video thumbnail" />
+            <span class="duration">16:45</span>
+          </a>
+          <div class="meta">
+            <a class="channel-link" href="channel4.html">
+              <img class="channel-avatar" src="https://picsum.photos/seed/ch4/80" alt="Channel avatar" />
+            </a>
+            <div class="text">
+              <a class="title" href="video4.html">AI in 2026: What’s next?</a>
+              <a class="byline" href="channel4.html">ThinkTech</a>
+              <div class="stats">2.4M views • 1 day ago</div>
+            </div>
+            <div class="menu">⋮</div>
+          </div>
+        </article>
+
+        <!-- Card 5 -->
+        <article class="card">
+          <a class="thumb" href="video5.html">
+            <img src="https://picsum.photos/seed/yt5/800/450" alt="Video thumbnail" />
+            <span class="duration">10:10</span>
+          </a>
+          <div class="meta">
+            <a class="channel-link" href="channel5.html">
+              <img class="channel-avatar" src="https://picsum.photos/seed/ch5/80" alt="Channel avatar" />
+            </a>
+            <div class="text">
+              <a class="title" href="video5.html">Street food tour: Old Delhi</a>
+              <a class="byline" href="channel5.html">Travel Byte</a>
+              <div class="stats">312K views • 1 week ago</div>
+            </div>
+            <div class="menu">⋮</div>
+          </div>
+        </article>
+
+        <!-- Card 6 -->
+        <article class="card">
+          <a class="thumb" href="video6.html">
+            <img src="https://picsum.photos/seed/yt6/800/450" alt="Video thumbnail" />
+            <span class="duration">5:59</span>
+          </a>
+          <div class="meta">
+            <a class="channel-link" href="channel6.html">
+              <img class="channel-avatar" src="https://picsum.photos/seed/ch6/80" alt="Channel avatar" />
+            </a>
+            <div class="text">
+              <a class="title" href="video6.html">How to color grade like a pro (free tools)</a>
+              <a class="byline" href="channel6.html">FrameLab</a>
+              <div class="stats">221K views • 4 days ago</div>
+            </div>
+            <div class="menu">⋮</div>
+          </div>
+        </article>
+
+        <!-- Card 7 -->
+        <article class="card">
+          <a class="thumb" href="video7.html">
+            <img src="https://picsum.photos/seed/yt7/800/450" alt="Video thumbnail" />
+            <span class="duration">32:01</span>
+          </a>
+          <div class="meta">
+            <a class="channel-link" href="channel7.html">
+              <img class="channel-avatar" src="https://picsum.photos/seed/ch7/80" alt="Channel avatar" />
+            </a>
+            <div class="text">
+              <a class="title" href="video7.html">The science of good sleep</a>
+              <a class="byline" href="channel7.html">BrainStuff</a>
+              <div class="stats">1.8M views • 2 months ago</div>
+            </div>
+            <div class="menu">⋮</div>
+          </div>
+        </article>
+
+        <!-- Card 8 -->
+        <article class="card">
+          <a class="thumb" href="video8.html">
+            <img src="https://picsum.photos/seed/yt8/800/450" alt="Video thumbnail" />
+            <span class="duration">14:27</span>
+          </a>
+          <div class="meta">
+            <a class="channel-link" href="channel8.html">
+              <img class="channel-avatar" src="https://picsum.photos/seed/ch8/80" alt="Channel avatar" />
+            </a>
+            <div class="text">
+              <a class="title" href="video8.html">Ultimate budget desk setup (2025)</a>
+              <a class="byline" href="channel8.html">SetupGuide</a>
+              <div class="stats">642K views • 3 weeks ago</div>
+            </div>
+            <div class="menu">⋮</div>
+          </div>
+        </article>
+
+        <!-- Card 9 -->
+        <article class="card">
+          <a class="thumb" href="video9.html">
+            <img src="https://picsum.photos/seed/yt9/800/450" alt="Video thumbnail" />
+            <span class="duration">19:08</span>
+          </a>
+          <div class="meta">
+            <a class="channel-link" href="channel9.html">
+              <img class="channel-avatar" src="https://picsum.photos/seed/ch9/80" alt="Channel avatar" />
+            </a>
+            <div class="text">
+              <a class="title" href="video9.html">Beginner yoga flow (no equipment)</a>
+              <a class="byline" href="channel9.html">MoveEasy</a>
+              <div class="stats">88K views • 6 days ago</div>
+            </div>
+            <div class="menu">⋮</div>
+          </div>
+        </article>
+
+        <!-- Card 10 -->
+        <article class="card">
+          <a class="thumb" href="video10.html">
+            <img src="https://picsum.photos/seed/yt10/800/450" alt="Video thumbnail" />
+            <span class="duration">11:12</span>
+          </a>
+          <div class="meta">
+            <a class="channel-link" href="channel10.html">
+              <img class="channel-avatar" src="https://picsum.photos/seed/ch10/80" alt="Channel avatar" />
+            </a>
+            <div class="text">
+              <a class="title" href="video10.html">React vs. Svelte: 2025 showdown</a>
+              <a class="byline" href="channel10.html">CodeTalks</a>
+              <div class="stats">534K views • 1 month ago</div>
+            </div>
+            <div class="menu">⋮</div>
+          </div>
+        </article>
+
+        <!-- Card 11 -->
+        <article class="card">
+          <a class="thumb" href="video11.html">
+            <img src="https://picsum.photos/seed/yt11/800/450" alt="Video thumbnail" />
+            <span class="duration">7:04</span>
+          </a>
+          <div class="meta">
+            <a class="channel-link" href="channel11.html">
+              <img class="channel-avatar" src="https://picsum.photos/seed/ch11/80" alt="Channel avatar" />
+            </a>
+            <div class="text">
+              <a class="title" href="video11.html">Hidden features in Windows 11</a>
+              <a class="byline" href="channel11.html">TechCraft</a>
+              <div class="stats">1.1M views • 5 days ago</div>
+            </div>
+            <div class="menu">⋮</div>
+          </div>
+        </article>
+
+        <!-- Card 12 -->
+        <article class="card">
+          <a class="thumb" href="video12.html">
+            <img src="https://picsum.photos/seed/yt12/800/450" alt="Video thumbnail" />
+            <span class="duration">9:48</span>
+          </a>
+          <div class="meta">
+            <a class="channel-link" href="channel12.html">
+              <img class="channel-avatar" src="https://picsum.photos/seed/ch12/80" alt="Channel avatar" />
+            </a>
+            <div class="text">
+              <a class="title" href="video12.html">Minimalist morning routine</a>
+              <a class="byline" href="channel12.html">SlowLife</a>
+              <div class="stats">402K views • 2 weeks ago</div>
+            </div>
+            <div class="menu">⋮</div>
+          </div>
+        </article>
+
+        <!-- Card 13 -->
+        <article class="card">
+          <a class="thumb" href="video13.html">
+            <img src="https://picsum.photos/seed/yt13/800/450" alt="Video thumbnail" />
+            <span class="duration">22:18</span>
+          </a>
+          <div class="meta">
+            <a class="channel-link" href="channel13.html">
+              <img class="channel-avatar" src="https://picsum.photos/seed/ch13/80" alt="Channel avatar" />
+            </a>
+            <div class="text">
+              <a class="title" href="video13.html">Photography basics: Light & composition</a>
+              <a class="byline" href="channel13.html">LensLab</a>
+              <div class="stats">190K views • 3 weeks ago</div>
+            </div>
+            <div class="menu">⋮</div>
+          </div>
+        </article>
+
+        <!-- Card 14 -->
+        <article class="card">
+          <a class="thumb" href="video14.html">
+            <img src="https://picsum.photos/seed/yt14/800/450" alt="Video thumbnail" />
+            <span class="duration">18:02</span>
+          </a>
+          <div class="meta">
+            <a class="channel-link" href="channel14.html">
+              <img class="channel-avatar" src="https://picsum.photos/seed/ch14/80" alt="Channel avatar" />
+            </a>
+            <div class="text">
+              <a class="title" href="video14.html">Cooking with 5 ingredients: Weeknight wins</a>
+              <a class="byline" href="channel14.html">KitchenQuick</a>
+              <div class="stats">842K views • 3 days ago</div>
+            </div>
+            <div class="menu">⋮</div>
+          </div>
+        </article>
+
+        <!-- Card 15 -->
+        <article class="card">
+          <a class="thumb" href="video15.html">
+            <img src="https://picsum.photos/seed/yt15/800/450" alt="Video thumbnail" />
+            <span class="duration">12:03</span>
+          </a>
+          <div class="meta">
+            <a class="channel-link" href="channel15.html">
+              <img class="channel-avatar" src="https://picsum.photos/seed/ch15/80" alt="Channel avatar" />
+            </a>
+            <div class="text">
+              <a class="title" href="video15.html">Top 10 Android tips in 2025</a>
+              <a class="byline" href="channel15.html">DroidDaily</a>
+              <div class="stats">1.5M views • 2 weeks ago</div>
+            </div>
+            <div class="menu">⋮</div>
+          </div>
+        </article>
+
+        <!-- Card 16 -->
+        <article class="card">
+          <a class="thumb" href="video16.html">
+            <img src="https://picsum.photos/seed/yt16/800/450" alt="Video thumbnail" />
+            <span class="duration">26:49</span>
+          </a>
+          <div class="meta">
+            <a class="channel-link" href="channel16.html">
+              <img class="channel-avatar" src="https://picsum.photos/seed/ch16/80" alt="Channel avatar" />
+            </a>
+            <div class="text">
+              <a class="title" href="video16.html">How the internet works (visual guide)</a>
+              <a class="byline" href="channel16.html">NetNerd</a>
+              <div class="stats">273K views • 1 month ago</div>
+            </div>
+            <div class="menu">⋮</div>
+          </div>
+        </article>
+      </div>
+
+      <div class="spacer"></div>
+    </main>
+  </div>
 </body>
 </html>
